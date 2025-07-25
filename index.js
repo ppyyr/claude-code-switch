@@ -93,6 +93,29 @@ function saveSettings(settings) {
 }
 
 /**
+ * 获取当前激活的API配置
+ * @returns {Object|null} 当前激活的配置对象或null（如果没有找到）
+ */
+function getCurrentConfig() {
+  const settings = readSettings();
+  
+  // 如果settings中没有环境变量配置，返回null
+  if (!settings.env || !settings.env.ANTHROPIC_BASE_URL || !settings.env.ANTHROPIC_AUTH_TOKEN) {
+    return null;
+  }
+  
+  const currentBaseUrl = settings.env.ANTHROPIC_BASE_URL;
+  const currentAuthToken = settings.env.ANTHROPIC_AUTH_TOKEN;
+  
+  // 查找匹配的配置
+  const apiConfigs = readApiConfigs();
+  return apiConfigs.find(config => 
+    config.ANTHROPIC_BASE_URL === currentBaseUrl && 
+    config.ANTHROPIC_AUTH_TOKEN === currentAuthToken
+  ) || null;
+}
+
+/**
  * 列出所有可用的API配置并提示用户选择（同时支持交互式菜单和序号输入）
  */
 function listAndSelectConfig() {
@@ -103,11 +126,33 @@ function listAndSelectConfig() {
     process.exit(0);
   }
   
+  // 获取当前激活的配置
+  const currentConfig = getCurrentConfig();
+  
+  // 如果有当前激活的配置，显示它
+  if (currentConfig) {
+    console.log(chalk.green('当前激活的配置: ') + chalk.white(currentConfig.name));
+    console.log();
+  }
+  
+  // 找出最长的名称长度，用于对齐
+  const maxNameLength = apiConfigs.reduce((max, config) => 
+    Math.max(max, config.name.length), 0);
+  
   // 准备选项列表
-  const choices = apiConfigs.map((config, index) => ({
-    name: `${index + 1}. ${config.name}`,
-    value: index
-  }));
+  const choices = apiConfigs.map((config, index) => {
+    // 如果是当前激活的配置，添加标记
+    const isActive = currentConfig && config.name === currentConfig.name;
+    
+    // 格式化配置信息：[name] key url，name对齐
+    const paddedName = config.name.padEnd(maxNameLength, ' ');
+    const configInfo = `[${paddedName}]  ${config.ANTHROPIC_AUTH_TOKEN}  ${config.ANTHROPIC_BASE_URL}`;
+    
+    return {
+      name: `${index + 1}. ${configInfo}${isActive ? chalk.green(' (当前)') : ''}`,
+      value: index
+    };
+  });
   
   // 添加一个输入选项
   choices.push(new inquirer.Separator());
@@ -124,15 +169,28 @@ function listAndSelectConfig() {
         name: 'configIndex',
         message: '请选择要切换的配置:',
         choices: choices,
-        pageSize: 10 // 控制一次显示的选项数量
+        pageSize: 10, // 控制一次显示的选项数量
+        // 设置更宽的显示宽度以支持长配置信息
+        prefix: '',
+        suffix: '',
       }
     ])
     .then(answers => {
       // 如果用户选择了"输入序号"选项
       if (answers.configIndex === 'input') {
+        // 显示配置列表以供参考
+        console.log(chalk.cyan('\n可用的API配置:'));
+        apiConfigs.forEach((config, index) => {
+          const isActive = currentConfig && config.name === currentConfig.name;
+          const activeMarker = isActive ? chalk.green(' (当前激活)') : '';
+          const paddedName = config.name.padEnd(maxNameLength, ' ');
+          const configInfo = `[${paddedName}]  ${config.ANTHROPIC_AUTH_TOKEN}  ${config.ANTHROPIC_BASE_URL}`;
+          console.log(chalk.white(` ${index + 1}. ${configInfo}${activeMarker}`));
+        });
+        
         const rl = createReadlineInterface();
         
-        rl.question(chalk.cyan('请输入配置序号 (1-' + apiConfigs.length + '): '), (indexAnswer) => {
+        rl.question(chalk.cyan('\n请输入配置序号 (1-' + apiConfigs.length + '): '), (indexAnswer) => {
           const index = parseInt(indexAnswer, 10);
           
           if (isNaN(index) || index < 1 || index > apiConfigs.length) {
@@ -142,6 +200,14 @@ function listAndSelectConfig() {
           }
           
           const selectedConfig = apiConfigs[index - 1];
+          
+          // 如果选择的配置就是当前激活的配置，提示用户
+          if (currentConfig && selectedConfig.name === currentConfig.name) {
+            console.log(chalk.yellow(`\n配置 "${selectedConfig.name}" 已经是当前激活的配置`));
+            rl.close();
+            return;
+          }
+          
           processSelectedConfig(selectedConfig);
           rl.close();
         });
@@ -151,6 +217,13 @@ function listAndSelectConfig() {
       // 用户通过交互式菜单选择了配置
       const selectedIndex = answers.configIndex;
       const selectedConfig = apiConfigs[selectedIndex];
+      
+      // 如果选择的配置就是当前激活的配置，提示用户
+      if (currentConfig && selectedConfig.name === currentConfig.name) {
+        console.log(chalk.yellow(`\n配置 "${selectedConfig.name}" 已经是当前激活的配置`));
+        return;
+      }
+      
       processSelectedConfig(selectedConfig);
     })
     .catch(error => {
