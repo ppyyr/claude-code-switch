@@ -1,0 +1,14 @@
+[
+  {
+    "name": "wenwen-ai",
+    "WEBURL": "https://code.wenwen-ai.com",
+    "ANTHROPIC_BASE_URL": "https://code.wenwen-ai.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-hsg5hOghHEk1rKHRxIEHZDdCNpmNMEfwMPNz7JEBz4faZb4Y"
+  },
+  {
+    "name": "zone",
+    "WEBURL": "https://zone.veloera.org",
+    "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
+    "ANTHROPIC_AUTH_TOKEN": "sk-sA59aXNTweTIWtiuSTLnEGA3L8gSzHYgJApvgfSNyf9F6mfJ"
+  }
+]

@@ -1,0 +1,44 @@
+实现一个在本地运行的node程序 ccs
+功能如下：
+#指令1： ccs list
+读取本机 ~/.claude 文件夹中的 文件apiConfigs.json 文件
+文件内容如下：
+[
+    {
+    "name": "instcopilot",
+    "WEBURL": "https://instcopilot-api.com/",
+    "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-ujxkbuicJ0JDPxSE1T7c2V6EnCNm5Aw67FWpNEe8mk7luMVB"
+  },
+   {
+    "name": "anyrouter-linux-do",
+    "WEBURL": "https://anyrouter.top",
+    "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-ujxkbuicJ0JDPxSE1T7c2V6EnCNm5Aw67FWpNEe8mk7luMVB"
+  }
+]
+
+ccs list返回结果：
+ 1. instcopilot 
+ 2. anyrouter-linux-do 
+ 3. ...
+ 4. ...
+ 5. ...
+ 6. ...
+ 7. ...
+ 8. ...
+ 9. ...
+ 10. ...
+
+#指令2： ccs set <序号>
+读取序号对应的ANTHROPIC_BASE_URL 和ANTHROPIC_AUTH_TOKEN 
+替换 ~/.claude/settings.json ，env属性的对应子属性，
+保存文件
+
+保存成功后，输出当前配置项如：
+  {
+    "name": "anyrouter-linux-do",
+    "WEBURL": "https://anyrouter.top",
+    "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-ujxkbuicJ0JDPxSE1T7c2V6EnCNm5Aw67FWpNEe8mk7luMVB"
+  }

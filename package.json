@@ -1,0 +1,24 @@
+{
+  "name": "ccs",
+  "version": "1.0.0",
+  "description": "Claude配置切换工具",
+  "main": "index.js",
+  "bin": {
+    "ccs": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "claude",
+    "config",
+    "switch"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "inquirer": "^8.2.5"
+  }
+}
