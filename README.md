@@ -40,24 +40,67 @@ npm install -g .
 
 ### 配置文件
 
-工具会读取 `~/.claude/apiConfigs.json` 文件中的配置信息，文件格式如下：
+工具需要两个配置文件，都位于 `~/.claude/` 目录下：
+
+#### 1. apiConfigs.json - API配置列表
+
+存储所有可用的Claude API配置，格式如下：
 
 ```json
 [
   {
     "name": "wenwen-ai",
-    "WEBURL": "https://code.wenwen-ai.com",
-    "ANTHROPIC_BASE_URL": "https://code.wenwen-ai.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-XXXXXXX"
+    "config": {
+      "env": {
+        "ANTHROPIC_AUTH_TOKEN": "sk-XXXXXXX",
+        "ANTHROPIC_BASE_URL": "https://code.wenwen-ai.com",
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+      },
+      "permissions": {
+        "allow": [],
+        "deny": []
+      },
+      "model": "opus"
+    }
   },
   {
     "name": "zone",
-    "WEBURL": "https://zone.veloera.org",
-    "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
-    "ANTHROPIC_AUTH_TOKEN": "sk-XXXXXXX"
+    "config": {
+      "env": {
+        "ANTHROPIC_AUTH_TOKEN": "sk-XXXXXXX",
+        "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+      },
+      "permissions": {
+        "allow": [],
+        "deny": []
+      },
+      "model": "opus"
+    }
   }
 ]
 ```
+
+#### 2. settings.json - 当前激活配置
+
+存储当前使用的配置，格式如下：
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
+    "ANTHROPIC_AUTH_TOKEN": "sk-XXXXXXX",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+  "model": "opus"
+}
+```
+
+**注意**：切换配置时，整个 `settings.json` 文件会被选中配置的 `config` 对象完全替换。
 
 ### 命令
 
@@ -71,21 +114,30 @@ ccs list
 
 ```
 ? 请选择要切换的配置: (Use arrow keys)
-> 1. wenwen-ai
-  2. zone
-  3. co.yes.vg
-  4. a-generic.be-a.dev
+> 1. [wenwen-ai   ]  sk-XXXXXXX  https://code.wenwen-ai.com (当前)
+  2. [zone        ]  sk-XXXXXXX  https://zone.veloera.org/pg
+  3. [co.yes.vg   ]  sk-XXXXXXX  https://co.yes.vg/api
+  4. [a-generic   ]  sk-XXXXXXX  https://a-generic.be-a.dev/api
   ──────────────
   输入序号...
 
-? 请选择要切换的配置: 2. zone
+? 请选择要切换的配置: 2. [zone        ]  sk-XXXXXXX  https://zone.veloera.org/pg
 
 当前选择的配置:
 {
   "name": "zone",
-  "WEBURL": "https://zone.veloera.org",
-  "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
-  "ANTHROPIC_AUTH_TOKEN": "sk-xxxx"
+  "config": {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "sk-xxxx",
+      "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
+      "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    },
+    "permissions": {
+      "allow": [],
+      "deny": []
+    },
+    "model": "opus"
+  }
 }
 
 ? 确认切换到此配置? Yes
@@ -116,9 +168,18 @@ ccs use 2
 当前选择的配置:
 {
   "name": "zone",
-  "WEBURL": "https://zone.veloera.org",
-  "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
-  "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxx"
+  "config": {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxx",
+      "ANTHROPIC_BASE_URL": "https://zone.veloera.org/pg",
+      "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    },
+    "permissions": {
+      "allow": [],
+      "deny": []
+    },
+    "model": "opus"
+  }
 }
 
 ? 确认切换到此配置? Yes
@@ -185,19 +246,27 @@ ccs unknown
 
 ## 注意事项
 
-- 确保 `~/.claude/apiConfigs.json` 文件存在并包含有效的配置信息
+- 确保 `~/.claude/apiConfigs.json` 和 `~/.claude/settings.json` 文件存在并包含有效的配置信息
 - 工具会自动创建 `~/.claude` 目录（如果不存在）
 - 确认操作时默认为"是"，直接按Enter键即可确认
+- 切换配置时会完全替换 `settings.json` 文件内容
 
 ## 更新日志
 
-### 1.0.0
+### 1.2.0
 
-- 初始版本发布
-- 基本的API配置切换功能
+- 支持完整的Claude配置对象格式
+- 新增配置深度比较功能，准确识别当前激活配置
+- 优化配置显示格式，对齐显示配置名称
+- 更新配置文件结构，支持env、permissions、model等完整配置项
 
 ### 1.1.0
 
 - 添加交互式菜单，支持光标上下移动选择
 - 保留原有的序号输入功能
 - 优化用户体验，确认操作时默认为"是"
+
+### 1.0.0
+
+- 初始版本发布
+- 基本的API配置切换功能
