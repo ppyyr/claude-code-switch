@@ -93,25 +93,46 @@ function saveSettings(settings) {
 }
 
 /**
+ * 深度比较两个对象是否相等
+ * @param {Object} obj1 
+ * @param {Object} obj2 
+ * @returns {boolean}
+ */
+function deepEqual(obj1, obj2) {
+  if (obj1 === obj2) return true;
+  
+  if (obj1 == null || obj2 == null) return false;
+  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
+  
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  
+  if (keys1.length !== keys2.length) return false;
+  
+  for (let key of keys1) {
+    if (!keys2.includes(key)) return false;
+    if (!deepEqual(obj1[key], obj2[key])) return false;
+  }
+  
+  return true;
+}
+
+/**
  * 获取当前激活的API配置
  * @returns {Object|null} 当前激活的配置对象或null（如果没有找到）
  */
 function getCurrentConfig() {
   const settings = readSettings();
   
-  // 如果settings中没有环境变量配置，返回null
-  if (!settings.env || !settings.env.ANTHROPIC_BASE_URL || !settings.env.ANTHROPIC_AUTH_TOKEN) {
+  // 如果settings为空，返回null
+  if (!settings || Object.keys(settings).length === 0) {
     return null;
   }
-  
-  const currentBaseUrl = settings.env.ANTHROPIC_BASE_URL;
-  const currentAuthToken = settings.env.ANTHROPIC_AUTH_TOKEN;
   
   // 查找匹配的配置
   const apiConfigs = readApiConfigs();
   return apiConfigs.find(config => 
-    config.ANTHROPIC_BASE_URL === currentBaseUrl && 
-    config.ANTHROPIC_AUTH_TOKEN === currentAuthToken
+    config.config && deepEqual(settings, config.config)
   ) || null;
 }
 
@@ -146,7 +167,7 @@ function listAndSelectConfig() {
     
     // 格式化配置信息：[name] key url，name对齐
     const paddedName = config.name.padEnd(maxNameLength, ' ');
-    const configInfo = `[${paddedName}]  ${config.ANTHROPIC_AUTH_TOKEN}  ${config.ANTHROPIC_BASE_URL}`;
+    const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
     
     return {
       name: `${index + 1}. ${configInfo}${isActive ? chalk.green(' (当前)') : ''}`,
@@ -184,7 +205,7 @@ function listAndSelectConfig() {
           const isActive = currentConfig && config.name === currentConfig.name;
           const activeMarker = isActive ? chalk.green(' (当前激活)') : '';
           const paddedName = config.name.padEnd(maxNameLength, ' ');
-          const configInfo = `[${paddedName}]  ${config.ANTHROPIC_AUTH_TOKEN}  ${config.ANTHROPIC_BASE_URL}`;
+          const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
           console.log(chalk.white(` ${index + 1}. ${configInfo}${activeMarker}`));
         });
         
@@ -250,18 +271,8 @@ function processSelectedConfig(selectedConfig) {
     ])
     .then(confirmAnswer => {
       if (confirmAnswer.confirm) {
-        // 更新settings.json
-        const settings = readSettings();
-        if (!settings.env) {
-          settings.env = {};
-        }
-        
-        // 更新环境变量
-        settings.env.ANTHROPIC_BASE_URL = selectedConfig.ANTHROPIC_BASE_URL;
-        settings.env.ANTHROPIC_AUTH_TOKEN = selectedConfig.ANTHROPIC_AUTH_TOKEN;
-      
-        // 保存设置
-        saveSettings(settings);
+        // 直接使用选择的配置替换整个settings.json
+        saveSettings(selectedConfig.config);
         
         console.log(chalk.green(`\n成功切换到配置: ${selectedConfig.name}`));
       } else {
@@ -323,18 +334,8 @@ function setConfig(index) {
     ])
     .then(answers => {
       if (answers.confirm) {
-        // 更新settings.json
-        const settings = readSettings();
-        if (!settings.env) {
-          settings.env = {};
-        }
-        
-        // 更新环境变量
-        settings.env.ANTHROPIC_BASE_URL = selectedConfig.ANTHROPIC_BASE_URL;
-        settings.env.ANTHROPIC_AUTH_TOKEN = selectedConfig.ANTHROPIC_AUTH_TOKEN;
-        
-        // 保存设置
-        saveSettings(settings);
+        // 直接使用选择的配置替换整个settings.json
+        saveSettings(selectedConfig.config);
         
         console.log(chalk.green(`\n成功切换到配置: ${selectedConfig.name}`));
       } else {
