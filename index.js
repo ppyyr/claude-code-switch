@@ -165,7 +165,7 @@ function listAndSelectConfig() {
     // 如果是当前激活的配置，添加标记
     const isActive = currentConfig && config.name === currentConfig.name;
     
-    // 格式化配置信息：[name] key url，name对齐
+    // 格式化配置信息：[name] key url，name对齐，密钥不格式化
     const paddedName = config.name.padEnd(maxNameLength, ' ');
     const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
     
@@ -179,7 +179,8 @@ function listAndSelectConfig() {
   choices.push(new inquirer.Separator());
   choices.push({
     name: '输入序号...',
-    value: 'input'
+    value: 'input',
+    disabled: ' ' // 让输入序号选项不可选中
   });
   
   // 使用inquirer创建交互式菜单
@@ -190,7 +191,7 @@ function listAndSelectConfig() {
         name: 'configIndex',
         message: '请选择要切换的配置:',
         choices: choices,
-        pageSize: 10, // 控制一次显示的选项数量
+        pageSize: choices.length, // 显示所有选项，确保"输入序号..."始终在底部
         // 设置更宽的显示宽度以支持长配置信息
         prefix: '',
         suffix: '',
@@ -203,7 +204,7 @@ function listAndSelectConfig() {
         console.log(chalk.cyan('\n可用的API配置:'));
         apiConfigs.forEach((config, index) => {
           const isActive = currentConfig && config.name === currentConfig.name;
-          const activeMarker = isActive ? chalk.green(' (当前激活)') : '';
+          const activeMarker = isActive ? chalk.green(' (当前)') : '';
           const paddedName = config.name.padEnd(maxNameLength, ' ');
           const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
           console.log(chalk.white(` ${index + 1}. ${configInfo}${activeMarker}`));
