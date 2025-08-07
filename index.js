@@ -15,7 +15,7 @@ const inquirer = require('inquirer');
 const { spawn } = require('child_process');
 
 // 版本号
-const VERSION = '1.4.0';
+const VERSION = '1.5.0';
 
 // 配置文件路径
 const CONFIG_DIR = path.join(os.homedir(), '.claude');
@@ -277,6 +277,46 @@ function processSelectedConfig(selectedConfig) {
         saveSettings(selectedConfig.config);
         
         console.log(chalk.green(`\n成功切换到配置: ${selectedConfig.name}`));
+        
+        // 显示当前配置信息
+        console.log(chalk.cyan('\n当前激活配置详情:'));
+        const { name, config } = selectedConfig;
+        console.log(chalk.white(`名称: ${name}`));
+        console.log(chalk.white(`API Key: ${config.env.ANTHROPIC_AUTH_TOKEN}`));
+        console.log(chalk.white(`Base URL: ${config.env.ANTHROPIC_BASE_URL}`));
+        console.log(chalk.white(`Model: ${config.model || 'default'}`));
+        
+        // 询问是否要在当前目录运行 Claude
+        inquirer
+          .prompt([
+            {
+              type: 'confirm',
+              name: 'runClaude',
+              message: '是否要在当前目录运行 claude?',
+              default: true
+            }
+          ])
+          .then(runAnswer => {
+            if (runAnswer.runClaude) {
+              console.log(chalk.green('\n正在启动 Claude...'));
+              
+              // 启动 Claude
+              const claudeProcess = spawn('claude', [], {
+                stdio: 'inherit',
+                cwd: process.cwd()
+              });
+              
+              claudeProcess.on('error', (error) => {
+                console.error(chalk.red(`启动 Claude 失败: ${error.message}`));
+                console.log(chalk.yellow('请确保 Claude CLI 已正确安装'));
+              });
+            } else {
+              console.log(chalk.yellow('您可以稍后手动运行 claude 命令'));
+            }
+          })
+          .catch(error => {
+            console.error(chalk.red(`发生错误: ${error.message}`));
+          });
       } else {
         console.log(chalk.yellow('\n操作已取消'));
       }
