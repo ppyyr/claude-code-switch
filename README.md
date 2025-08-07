@@ -14,6 +14,14 @@
 
 ## 安装
 
+### npm包安装
+
+已发布到https://www.npmjs.com/package/claude-config-switch
+
+```
+npm i claude-config-switch
+```
+
 ### 本地安装
 
 ```bash
