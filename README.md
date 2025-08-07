@@ -2,15 +2,24 @@
 
 一个用于在不同的Claude API配置之间进行切换的命令行工具。
 
+[ClaudeCode API 站点推荐](https://github.com/AlvinScrp/claude-code-switch/blob/main/ClaudeCode%20API%E7%AB%99.md)
+
+**强烈推荐这个**倍率高5块钱相当于10美金 ：[https://instcopilot-api.com/register?aff=J2wX](https://instcopilot-api.com/register?aff=J2wX)
+
 ## 功能
 
-- 列出所有可用的API配置并提示选择
-  - 支持交互式菜单（光标上下移动选择）
-  - 支持手动输入序号
-- 切换当前使用的API配置
-- 打开配置文件进行编辑
-- 显示版本信息
-- 错误处理和帮助提示
+列出所有可用的API配置并提示选择
+
+- 支持交互式菜单（光标上下移动选择）
+- 支持手动输入序号
+
+切换当前使用的API配置
+
+打开配置文件进行编辑
+
+显示版本信息
+
+错误处理和帮助提示
 
 ## 安装
 
@@ -196,22 +205,7 @@ ccs use 2
 ? 确认切换到此配置? Yes
 
 成功切换到配置: zone
-
-当前激活配置详情:
-名称: zone
-API Key: sk-xxxxxx
-Base URL: https://zone.veloera.org/pg
-Model: claude-sonnet-4-20250514
-
-? 是否要在当前目录运行 claude? (Y/n)
-
-正在启动 Claude...
 ```
-
-**新功能说明**：
-- 切换成功后会显示当前激活配置的详细信息
-- 自动询问是否要在当前目录运行 Claude CLI
-- 按 Enter 键（默认为 Yes）即可直接启动 Claude
 
 #### 打开配置文件
 
@@ -302,12 +296,6 @@ ccs unknown
 - 切换配置时会完全替换 `settings.json` 文件内容
 
 ## 更新日志
-
-### 1.5.0
-
-- 新增配置切换成功后的详细信息显示（名称、API Key、Base URL、Model）
-- 新增自动询问是否启动 Claude CLI 功能：切换配置成功后会询问是否在当前目录运行 `claude` 命令
-- 改进用户体验：一站式完成配置切换和 Claude 启动流程
 
 ### 1.4.0
 
