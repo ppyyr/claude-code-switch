@@ -8,6 +8,7 @@
   - 支持交互式菜单（光标上下移动选择）
   - 支持手动输入序号
 - 切换当前使用的API配置
+- 打开配置文件进行编辑
 - 显示版本信息
 - 错误处理和帮助提示
 
@@ -108,6 +109,8 @@ npm install -g .
 
 ```bash
 ccs list
+# 或使用简写
+ccs ls
 ```
 
 输出示例：
@@ -187,6 +190,18 @@ ccs use 2
 成功切换到配置: zone
 ```
 
+#### 打开配置文件
+
+```bash
+# 打开API配置文件 (apiConfigs.json)
+ccs o api
+
+# 打开设置配置文件 (settings.json)
+ccs o setting
+```
+
+这些命令会在默认编辑器中打开相应的配置文件，方便直接编辑配置。如果文件不存在，会显示相应的提示信息。
+
 #### 显示版本信息
 
 ```bash
@@ -219,8 +234,11 @@ Options:
   -h, --help         display help for command
 
 Commands:
-  list               列出所有可用的API配置并提示选择
+  list, ls           列出所有可用的API配置并提示选择
   use <index>        设置当前使用的API配置
+  o                  打开Claude配置文件
+    api              打开API配置文件 (apiConfigs.json)
+    setting          打开设置配置文件 (settings.json)
   help [command]     display help for command
 ```
 
@@ -239,7 +257,9 @@ ccs unknown
 
 可用命令:
   list
+  ls
   use
+  o
 
 使用 --help 查看更多信息
 ```
@@ -252,6 +272,13 @@ ccs unknown
 - 切换配置时会完全替换 `settings.json` 文件内容
 
 ## 更新日志
+
+### 1.3.0
+
+- 新增 `ccs ls` 命令作为 `ccs list` 的简写
+- 新增 `ccs o api` 命令用于打开API配置文件 (apiConfigs.json)
+- 新增 `ccs o setting` 命令用于打开设置配置文件 (settings.json)
+- 改进配置文件编辑体验，可以直接在默认编辑器中修改配置
 
 ### 1.2.0
 

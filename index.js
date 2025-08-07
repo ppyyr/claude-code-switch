@@ -12,6 +12,7 @@ const chalk = require('chalk');
 const os = require('os');
 const readline = require('readline');
 const inquirer = require('inquirer');
+const { spawn } = require('child_process');
 
 // 版本号
 const VERSION = '1.0.0';
@@ -349,6 +350,33 @@ function setConfig(index) {
 }
 
 /**
+ * 打开指定的配置文件
+ * @param {string} filePath 文件路径
+ */
+function openConfigFile(filePath) {
+  const fullPath = path.resolve(filePath);
+  
+  if (!fs.existsSync(fullPath)) {
+    console.log(chalk.yellow(`配置文件不存在: ${fullPath}`));
+    return;
+  }
+  
+  console.log(chalk.cyan(`正在打开: ${fullPath}`));
+  
+  // 使用spawn执行open命令
+  const child = spawn('open', [fullPath], { 
+    stdio: 'inherit',
+    detached: true 
+  });
+  
+  child.on('error', (error) => {
+    console.error(chalk.red(`打开文件失败: ${error.message}`));
+  });
+  
+  child.unref(); // 允许父进程独立于子进程退出
+}
+
+/**
  * 显示版本信息
  */
 function showVersion() {
@@ -363,6 +391,7 @@ program
 
 program
   .command('list')
+  .alias('ls')
   .description('列出所有可用的API配置并提示选择')
   .action(() => {
     ensureConfigDir();
@@ -375,6 +404,24 @@ program
   .action((index) => {
     ensureConfigDir();
     setConfig(parseInt(index, 10));
+  });
+
+const openCommand = program
+  .command('o')
+  .description('打开Claude配置文件');
+
+openCommand
+  .command('api')
+  .description('打开API配置文件 (apiConfigs.json)')
+  .action(() => {
+    openConfigFile(API_CONFIGS_FILE);
+  });
+
+openCommand
+  .command('setting')
+  .description('打开设置配置文件 (settings.json)')
+  .action(() => {
+    openConfigFile(SETTINGS_FILE);
   });
 
 // 添加错误处理
