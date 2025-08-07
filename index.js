@@ -15,7 +15,7 @@ const inquirer = require('inquirer');
 const { spawn } = require('child_process');
 
 // 版本号
-const VERSION = '1.3.0';
+const VERSION = '1.4.0';
 
 // 配置文件路径
 const CONFIG_DIR = path.join(os.homedir(), '.claude');
@@ -350,6 +350,47 @@ function setConfig(index) {
 }
 
 /**
+ * 获取API配置文件的示例内容
+ */
+function getApiConfigTemplate() {
+  return [
+    {
+      "name": "example-config",
+      "config": {
+        "env": {
+          "ANTHROPIC_AUTH_TOKEN": "sk-YOUR_API_KEY_HERE",
+          "ANTHROPIC_BASE_URL": "https://api.anthropic.com",
+          "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+        },
+        "permissions": {
+          "allow": [],
+          "deny": []
+        },
+        "model": "claude-sonnet-4-20250514"
+      }
+    }
+  ];
+}
+
+/**
+ * 获取设置文件的示例内容
+ */
+function getSettingsTemplate() {
+  return {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "sk-YOUR_API_KEY_HERE",
+      "ANTHROPIC_BASE_URL": "https://api.anthropic.com",
+      "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    },
+    "permissions": {
+      "allow": [],
+      "deny": []
+    },
+    "model": "claude-sonnet-4-20250514"
+  };
+}
+
+/**
  * 打开指定的配置文件
  * @param {string} filePath 文件路径
  */
@@ -357,8 +398,29 @@ function openConfigFile(filePath) {
   const fullPath = path.resolve(filePath);
   
   if (!fs.existsSync(fullPath)) {
-    console.log(chalk.yellow(`配置文件不存在: ${fullPath}`));
-    return;
+    // 确保配置目录存在
+    ensureConfigDir();
+    
+    // 创建示例配置文件
+    let templateContent;
+    if (fullPath === API_CONFIGS_FILE) {
+      templateContent = JSON.stringify(getApiConfigTemplate(), null, 2);
+      console.log(chalk.green(`创建API配置文件: ${fullPath}`));
+    } else if (fullPath === SETTINGS_FILE) {
+      templateContent = JSON.stringify(getSettingsTemplate(), null, 2);
+      console.log(chalk.green(`创建设置配置文件: ${fullPath}`));
+    } else {
+      console.log(chalk.yellow(`配置文件不存在: ${fullPath}`));
+      return;
+    }
+    
+    try {
+      fs.writeFileSync(fullPath, templateContent, 'utf8');
+      console.log(chalk.green(`已创建示例配置文件，请根据需要修改配置内容`));
+    } catch (error) {
+      console.error(chalk.red(`创建配置文件失败: ${error.message}`));
+      return;
+    }
   }
   
   console.log(chalk.cyan(`正在打开: ${fullPath}`));

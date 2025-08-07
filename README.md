@@ -61,7 +61,7 @@ npm install -g .
         "allow": [],
         "deny": []
       },
-      "model": "opus"
+      "model": "claude-sonnet-4-20250514"
     }
   },
   {
@@ -76,7 +76,7 @@ npm install -g .
         "allow": [],
         "deny": []
       },
-      "model": "opus"
+      "model": "claude-sonnet-4-20250514"
     }
   }
 ]
@@ -97,7 +97,7 @@ npm install -g .
     "allow": [],
     "deny": []
   },
-  "model": "opus"
+  "model": "claude-sonnet-4-20250514"
 }
 ```
 
@@ -139,7 +139,7 @@ ccs ls
       "allow": [],
       "deny": []
     },
-    "model": "opus"
+    "model": "claude-sonnet-4-20250514"
   }
 }
 
@@ -181,7 +181,7 @@ ccs use 2
       "allow": [],
       "deny": []
     },
-    "model": "opus"
+    "model": "claude-sonnet-4-20250514"
   }
 }
 
@@ -200,7 +200,14 @@ ccs o api
 ccs o setting
 ```
 
-这些命令会在默认编辑器中打开相应的配置文件，方便直接编辑配置。如果文件不存在，会显示相应的提示信息。
+这些命令会在默认编辑器中打开相应的配置文件，方便直接编辑配置。如果文件不存在，会自动创建包含示例内容的配置文件。
+
+**自动创建的示例内容**：
+
+- **API配置文件** (`apiConfigs.json`)：包含一个示例配置，使用最新的Claude Sonnet 4模型
+- **设置配置文件** (`settings.json`)：包含基本的环境变量和权限设置
+
+只需将示例中的 `sk-YOUR_API_KEY_HERE` 替换为实际的API密钥即可使用。
 
 #### 显示版本信息
 
@@ -272,6 +279,12 @@ ccs unknown
 - 切换配置时会完全替换 `settings.json` 文件内容
 
 ## 更新日志
+
+### 1.4.0
+
+- 优化配置文件打开功能：文件不存在时自动创建包含示例内容的配置文件
+- 更新默认模型为 `claude-sonnet-4-20250514`（Claude Sonnet 4）
+- 改进用户体验：新用户可以立即开始使用工具，无需手动创建配置文件
 
 ### 1.3.0
 
