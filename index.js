@@ -15,7 +15,7 @@ const inquirer = require('inquirer');
 const { spawn } = require('child_process');
 
 // 版本号
-const VERSION = '1.0.0';
+const VERSION = '1.3.0';
 
 // 配置文件路径
 const CONFIG_DIR = path.join(os.homedir(), '.claude');
