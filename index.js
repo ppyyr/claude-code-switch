@@ -13,6 +13,7 @@ const os = require('os');
 const readline = require('readline');
 const inquirer = require('inquirer');
 const { spawn } = require('child_process');
+const notify = require('./notify');
 
 // 版本号
 const VERSION = '1.5.0';
@@ -94,6 +95,37 @@ function saveSettings(settings) {
 }
 
 /**
+ * 保存配置时保持现有的hooks和其他设置
+ * @param {Object} newConfig 新的配置对象
+ */
+function saveSettingsPreservingHooks(newConfig) {
+  try {
+    // 读取当前设置
+    const currentSettings = readSettings();
+    
+    // 合并配置，只有当前设置中存在hooks时才保持
+    const mergedSettings = {
+      ...newConfig
+    };
+    
+    // 如果当前设置中有hooks，则保持
+    if (currentSettings.hooks) {
+      mergedSettings.hooks = currentSettings.hooks;
+    }
+    
+    // 如果当前设置中有statusLine，则保持
+    if (currentSettings.statusLine) {
+      mergedSettings.statusLine = currentSettings.statusLine;
+    }
+    
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(mergedSettings, null, 2), 'utf8');
+  } catch (error) {
+    console.error(chalk.red(`保存设置文件失败: ${error.message}`));
+    process.exit(1);
+  }
+}
+
+/**
  * 深度比较两个对象是否相等
  * @param {Object} obj1 
  * @param {Object} obj2 
@@ -130,11 +162,18 @@ function getCurrentConfig() {
     return null;
   }
   
-  // 查找匹配的配置
+  // 查找匹配的配置，只比较核心字段
   const apiConfigs = readApiConfigs();
-  return apiConfigs.find(config => 
-    config.config && deepEqual(settings, config.config)
-  ) || null;
+  return apiConfigs.find(config => {
+    if (!config.config) return false;
+    
+    // 主要比较 env 字段中的关键配置
+    const currentEnv = settings.env || {};
+    const configEnv = config.config.env || {};
+    
+    return currentEnv.ANTHROPIC_BASE_URL === configEnv.ANTHROPIC_BASE_URL &&
+           currentEnv.ANTHROPIC_AUTH_TOKEN === configEnv.ANTHROPIC_AUTH_TOKEN;
+  }) || null;
 }
 
 /**
@@ -273,8 +312,8 @@ function processSelectedConfig(selectedConfig) {
     ])
     .then(confirmAnswer => {
       if (confirmAnswer.confirm) {
-        // 直接使用选择的配置替换整个settings.json
-        saveSettings(selectedConfig.config);
+        // 保存配置时保持现有的hooks设置
+        saveSettingsPreservingHooks(selectedConfig.config);
         
         console.log(chalk.green(`\n成功切换到配置: ${selectedConfig.name}`));
         
@@ -377,7 +416,7 @@ function setConfig(index) {
     .then(answers => {
       if (answers.confirm) {
         // 直接使用选择的配置替换整个settings.json
-        saveSettings(selectedConfig.config);
+        saveSettingsPreservingHooks(selectedConfig.config);
         
         console.log(chalk.green(`\n成功切换到配置: ${selectedConfig.name}`));
       } else {
@@ -405,8 +444,7 @@ function getApiConfigTemplate() {
         "permissions": {
           "allow": [],
           "deny": []
-        },
-        "model": "claude-sonnet-4-20250514"
+        }
       }
     }
   ];
@@ -425,8 +463,7 @@ function getSettingsTemplate() {
     "permissions": {
       "allow": [],
       "deny": []
-    },
-    "model": "claude-sonnet-4-20250514"
+    }
   };
 }
 
@@ -485,6 +522,7 @@ function showVersion() {
   console.log(`ccs 版本: ${VERSION}`);
 }
 
+
 // 设置命令行程序
 program
   .name('ccs')
@@ -525,6 +563,9 @@ openCommand
   .action(() => {
     openConfigFile(SETTINGS_FILE);
   });
+
+// 注册notify相关命令
+notify.registerNotifyCommands(program);
 
 // 添加错误处理
 program.on('command:*', (operands) => {

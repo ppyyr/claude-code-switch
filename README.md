@@ -21,6 +21,11 @@
 
 错误处理和帮助提示
 
+**1.6.0新增**：企微通知功能
+- 自动配置ClaudeCode Hooks
+- 支持Notification和Stop事件通知
+- 完整的通知配置管理
+
 ## 安装
 
 ### npm包安装
@@ -58,7 +63,7 @@ npm install -g .
 
 ### 配置文件
 
-工具需要两个配置文件，都位于 `~/.claude/` 目录下：
+工具需要三个配置文件，都位于 `~/.claude/` 目录下：
 
 #### 1. apiConfigs.json - API配置列表
 
@@ -119,6 +124,31 @@ npm install -g .
 ```
 
 **注意**：切换配置时，整个 `settings.json` 文件会被选中配置的 `config` 对象完全替换。
+
+#### 3. notify.json - 通知配置
+
+存储企微机器人等通知渠道的配置，格式如下：
+
+```json
+{
+  "wechatWork": {
+    "webhookUrl": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY",
+    "enabled": true
+  },
+  "telegram": {
+    "enabled": false
+  },
+  "slack": {
+    "enabled": false
+  }
+}
+```
+
+**说明**：
+
+- `wechatWork.webhookUrl`: 企微群机器人的Webhook地址
+- `wechatWork.enabled`: 是否启用企微通知
+- 其他通知渠道为预留配置，暂未实现
 
 ### 命令
 
@@ -226,6 +256,79 @@ ccs o setting
 
 只需将示例中的 `sk-YOUR_API_KEY_HERE` 替换为实际的API密钥即可使用。
 
+#### 企微通知配置
+
+##### 设置企微通知
+
+```bash
+ccs notify setup
+# 或使用简写
+ccs ntf setup
+```
+
+配置企微机器人通知功能：
+1. 在企微群聊中添加机器人
+2. 获取机器人的Webhook地址
+3. 输入Webhook地址完成配置
+4. 自动配置ClaudeCode Hooks
+
+输出示例：
+
+```
+设置企微机器人通知配置:
+请在企微群聊中添加机器人，获取Webhook地址
+格式: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY
+配置完成后，将自动通过ClaudeCode Hooks监听Notification和Stop事件
+
+请输入企微机器人Webhook地址: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxx
+
+通知配置已保存到: /Users/username/.claude/notify.json
+✓ Hook脚本已创建: /Users/username/.claude/scripts/wechat-notify.js
+✓ ClaudeCode Hooks配置已更新
+
+配置完成！现在ClaudeCode将在以下事件时发送企微通知:
+  - Notification事件: 当Claude需要用户关注时
+  - Stop事件: 当Claude任务完成时
+```
+
+##### 查看通知状态
+
+```bash
+ccs notify status
+```
+
+显示当前通知配置状态，包括：
+- 企微机器人启用状态
+- Hook事件配置状态
+- ClaudeCode hooks配置状态
+
+输出示例：
+
+```
+当前通知配置状态:
+企微机器人: 已启用
+Webhook地址: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=***
+Hook事件: 已启用
+  Notification事件: 启用
+  Stop事件: 启用
+ClaudeCode hooks配置: 已配置
+```
+
+##### 测试通知功能
+
+```bash
+ccs notify test
+```
+
+发送测试通知到配置的企微群：
+
+输出示例：
+
+```
+正在发送测试通知...
+✓ 企微通知发送成功
+```
+
 #### 显示版本信息
 
 ```bash
@@ -237,7 +340,7 @@ ccs -v
 输出示例：
 
 ```
-ccs 版本: 1.0.0
+ccs 版本: 1.6.0
 ```
 
 #### 显示帮助信息
@@ -260,6 +363,10 @@ Options:
 Commands:
   list, ls           列出所有可用的API配置并提示选择
   use <index>        设置当前使用的API配置
+  notify, ntf        配置企微通知设置
+    setup            设置企微机器人webhook地址
+    status           查看当前通知配置状态
+    test             测试企微通知功能
   o                  打开Claude配置文件
     api              打开API配置文件 (apiConfigs.json)
     setting          打开设置配置文件 (settings.json)
@@ -281,8 +388,10 @@ ccs unknown
 
 可用命令:
   list
-  ls
+  ls  
   use
+  notify
+  ntf
   o
 
 使用 --help 查看更多信息
@@ -294,8 +403,30 @@ ccs unknown
 - 工具会自动创建 `~/.claude` 目录（如果不存在）
 - 确认操作时默认为"是"，直接按Enter键即可确认
 - 切换配置时会完全替换 `settings.json` 文件内容
+- 使用 `ntf` 命令需要先在企微群中添加机器人并获取Webhook地址
+- `notify.json` 文件首次使用时会自动创建
 
 ## 更新日志
+
+### **1.6.0 - 通知功能**
+
++ **新增企微通知功能**: 支持通过企微机器人接收Claude Code通知
++ **智能Hook集成**: 自动配置ClaudeCode Hooks，无需手动监听
++ **事件通知支持**: 
+  - `Notification`事件: 当Claude需要用户关注时自动通知
+  - `Stop`事件: 当Claude任务完成时自动通知
++ **完整通知管理**: 
+  - `ccs notify setup` - 配置企微机器人
+  - `ccs notify status` - 查看通知配置状态  
+  - `ccs notify test` - 测试通知功能
++ **自动化配置**: 自动创建Hook脚本和更新Claude设置文件
++ **配置文件支持**: 新增`notify.json`配置文件管理通知设置
+
+### **1.5.0**
+
++ 新增配置切换成功后的详细信息显示（名称、API Key、Base URL、Model）
++ 新增自动询问是否启动 Claude CLI 功能：切换配置成功后会询问是否在当前目录运行 `claude` 命令
++ 改进用户体验：一站式完成配置切换和 Claude 启动流程
 
 ### 1.4.0
 
