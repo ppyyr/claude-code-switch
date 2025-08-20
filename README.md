@@ -6,26 +6,6 @@
 
 **强烈推荐这个**倍率高5块钱相当于10美金 ：[https://instcopilot-api.com/register?aff=J2wX](https://instcopilot-api.com/register?aff=J2wX)
 
-## 功能
-
-列出所有可用的API配置并提示选择
-
-- 支持交互式菜单（光标上下移动选择）
-- 支持手动输入序号
-
-切换当前使用的API配置
-
-打开配置文件进行编辑
-
-显示版本信息
-
-错误处理和帮助提示
-
-**1.6.0新增**：企微通知功能
-- 自动配置ClaudeCode Hooks
-- 支持Notification和Stop事件通知
-- 完整的通知配置管理
-
 ## 安装
 
 ### npm包安装
@@ -124,31 +104,6 @@ npm install -g .
 ```
 
 **注意**：切换配置时，整个 `settings.json` 文件会被选中配置的 `config` 对象完全替换。
-
-#### 3. notify.json - 通知配置
-
-存储企微机器人等通知渠道的配置，格式如下：
-
-```json
-{
-  "wechatWork": {
-    "webhookUrl": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY",
-    "enabled": true
-  },
-  "telegram": {
-    "enabled": false
-  },
-  "slack": {
-    "enabled": false
-  }
-}
-```
-
-**说明**：
-
-- `wechatWork.webhookUrl`: 企微群机器人的Webhook地址
-- `wechatWork.enabled`: 是否启用企微通知
-- 其他通知渠道为预留配置，暂未实现
 
 ### 命令
 
@@ -267,10 +222,36 @@ ccs ntf setup
 ```
 
 配置企微机器人通知功能：
+
 1. 在企微群聊中添加机器人
 2. 获取机器人的Webhook地址
 3. 输入Webhook地址完成配置
 4. 自动配置ClaudeCode Hooks
+
+ notify.json - 通知配置
+
+存储企微机器人等通知渠道的配置，格式如下：
+
+```json
+{
+  "wechatWork": {
+    "webhookUrl": "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_KEY",
+    "enabled": true
+  },
+  "telegram": {
+    "enabled": false
+  },
+  "slack": {
+    "enabled": false
+  }
+}
+```
+
+**说明**：
+
+- `wechatWork.webhookUrl`: 企微群机器人的Webhook地址
+- `wechatWork.enabled`: 是否启用企微通知
+- 其他通知渠道为预留配置，暂未实现
 
 输出示例：
 
@@ -298,6 +279,7 @@ ccs notify status
 ```
 
 显示当前通知配置状态，包括：
+
 - 企微机器人启用状态
 - Hook事件配置状态
 - ClaudeCode hooks配置状态
@@ -412,15 +394,15 @@ ccs unknown
 
 + **新增企微通知功能**: 支持通过企微机器人接收Claude Code通知
 + **智能Hook集成**: 自动配置ClaudeCode Hooks，无需手动监听
-+ **事件通知支持**: 
++ **事件通知支持**:
   - `Notification`事件: 当Claude需要用户关注时自动通知
   - `Stop`事件: 当Claude任务完成时自动通知
-+ **完整通知管理**: 
++ **完整通知管理**:
   - `ccs notify setup` - 配置企微机器人
-  - `ccs notify status` - 查看通知配置状态  
+  - `ccs notify status` - 查看通知配置状态
   - `ccs notify test` - 测试通知功能
 + **自动化配置**: 自动创建Hook脚本和更新Claude设置文件
-+ **配置文件支持**: 新增`notify.json`配置文件管理通知设置
++ **配置文件支持**: 新增 `notify.json`配置文件管理通知设置
 
 ### **1.5.0**
 
