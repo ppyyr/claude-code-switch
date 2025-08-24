@@ -8,13 +8,13 @@
     "name": "instcopilot",
     "WEBURL": "https://instcopilot-api.com/",
     "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-ujxkbuicJ0JDPxSE1T7c2V6EnCNm5Aw67FWpNEe8mk7luMVB"
+    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxxxx"
   },
    {
     "name": "anyrouter-linux-do",
     "WEBURL": "https://anyrouter.top",
     "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-ujxkbuicJ0JDPxSE1T7c2V6EnCNm5Aw67FWpNEe8mk7luMVB"
+    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxxxx"
   }
 ]
 
@@ -40,5 +40,5 @@ ccs list返回结果：
     "name": "anyrouter-linux-do",
     "WEBURL": "https://anyrouter.top",
     "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-ujxkbuicJ0JDPxSE1T7c2V6EnCNm5Aw67FWpNEe8mk7luMVB"
+    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxxxx"
   }
