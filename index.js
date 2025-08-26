@@ -209,74 +209,26 @@ function listAndSelectConfig() {
     const paddedName = config.name.padEnd(maxNameLength, ' ');
     const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
     
-    return {
-      name: `${index + 1}. ${configInfo}${isActive ? chalk.green(' (当前)') : ''}`,
-      value: index
-    };
+    return `${configInfo}${isActive ? chalk.green(' (当前)') : ''}`;
   });
+
   
-  // 添加一个输入选项
-  choices.push(new inquirer.Separator());
-  choices.push({
-    name: '输入序号...',
-    value: 'input',
-    disabled: ' ' // 让输入序号选项不可选中
-  });
-  
-  // 使用inquirer创建交互式菜单
+  // 使用inquirer创建交互式菜单，支持多位数输入
   inquirer
     .prompt([
       {
-        type: 'list',
+        type: 'rawlist',
         name: 'configIndex',
         message: '请选择要切换的配置:',
-        choices: choices,
-        pageSize: choices.length, // 显示所有选项，确保"输入序号..."始终在底部
+        choices: choices, 
+        pageSize: Math.min(15, apiConfigs.length), // 限制显示行数，避免屏幕溢出
         // 设置更宽的显示宽度以支持长配置信息
         prefix: '',
         suffix: '',
       }
     ])
     .then(answers => {
-      // 如果用户选择了"输入序号"选项
-      if (answers.configIndex === 'input') {
-        // 显示配置列表以供参考
-        console.log(chalk.cyan('\n可用的API配置:'));
-        apiConfigs.forEach((config, index) => {
-          const isActive = currentConfig && config.name === currentConfig.name;
-          const activeMarker = isActive ? chalk.green(' (当前)') : '';
-          const paddedName = config.name.padEnd(maxNameLength, ' ');
-          const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
-          console.log(chalk.white(` ${index + 1}. ${configInfo}${activeMarker}`));
-        });
-        
-        const rl = createReadlineInterface();
-        
-        rl.question(chalk.cyan('\n请输入配置序号 (1-' + apiConfigs.length + '): '), (indexAnswer) => {
-          const index = parseInt(indexAnswer, 10);
-          
-          if (isNaN(index) || index < 1 || index > apiConfigs.length) {
-            console.error(chalk.red(`无效的序号: ${indexAnswer}，有效范围: 1-${apiConfigs.length}`));
-            rl.close();
-            return;
-          }
-          
-          const selectedConfig = apiConfigs[index - 1];
-          
-          // 如果选择的配置就是当前激活的配置，提示用户
-          if (currentConfig && selectedConfig.name === currentConfig.name) {
-            console.log(chalk.yellow(`\n配置 "${selectedConfig.name}" 已经是当前激活的配置`));
-            rl.close();
-            return;
-          }
-          
-          processSelectedConfig(selectedConfig);
-          rl.close();
-        });
-        return;
-      }
-      
-      // 用户通过交互式菜单选择了配置
+      // 用户通过rawlist菜单选择了配置（rawlist返回的是从0开始的索引）
       const selectedIndex = answers.configIndex;
       const selectedConfig = apiConfigs[selectedIndex];
       
@@ -579,10 +531,10 @@ program.on('command:*', (operands) => {
   process.exit(1);
 });
 
-// 如果没有提供命令，显示帮助信息
+// 如果没有提供命令，默认执行 list 命令
 if (!process.argv.slice(2).length) {
-  program.outputHelp();
-  process.exit(0); // 添加process.exit(0)确保程序在显示帮助信息后退出
-}
-
-program.parse(process.argv); 
+  ensureConfigDir();
+  listAndSelectConfig();
+} else {
+  program.parse(process.argv);
+} 
