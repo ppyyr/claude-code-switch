@@ -17,7 +17,7 @@ const notify = require('./notify');
 const health = require('./health');
 
 // 版本号
-const VERSION = '1.5.0';
+const VERSION = '1.7.0';
 
 // 配置文件路径
 const CONFIG_DIR = path.join(os.homedir(), '.claude');
