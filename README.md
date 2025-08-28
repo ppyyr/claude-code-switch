@@ -211,6 +211,51 @@ ccs o setting
 
 只需将示例中的 `sk-YOUR_API_KEY_HERE` 替换为实际的API密钥即可使用。
 
+#### 健康检查功能
+
+使用 `health` 命令可以检查所有配置的API端点的可用性和网络延迟：
+
+```bash
+ccs health
+```
+
+**功能特性**：
+
+- **智能端点检测**：自动尝试多种常见的API端点格式
+- **去重优化**：相同的 `ANTHROPIC_BASE_URL` 只检测一次
+- **实时反馈**：逐行显示检测进度和结果
+- **多端点支持**：支持以下端点格式：
+  - `/v1/models` - Claude Models API (默认)
+  - `/v1/chat/completions` - OpenAI 兼容 API
+  - `/v1/models` (无 anthropic-version 头)
+  - `/` - 根路径
+  - `/health` - 健康检查端点
+  - `/api/v1/models` - 备用API路径
+
+**输出示例**：
+
+```
+开始健康检查 (/v1/models)...
+
+| Name                 | Base URL                           | Token        | Status                   | Latency |
+|----------------------|------------------------------------|--------------|--------------------------|---------|
+| instcopilot-config   | https://sg.instcopilot-api.com    | sk-JCzb7**** | Healthy (status: 200)    | 414ms   |
+| co.yes.vg-config     | https://co.yes.vg                  | cr_2dc6**** | Healthy (status: 200)    | 892ms   |
+  → Found working endpoint: /v1/chat/completions (OpenAI Compatible API)
+| anthropic-official   | https://api.anthropic.com         | sk-ant-**** | Unhealthy (status: 401)  | 1205ms  |
+  Error: Unauthorized
+```
+
+**状态说明**：
+
+- **绿色 Healthy (2xx)**：端点正常工作
+- **红色 Unhealthy (4xx/5xx)**：端点有问题或鉴权失败
+- **黄色 Unhealthy**：网络错误或超时
+
+**Token 显示格式**：前7位 + **** (如：`sk-JCzb7****`)
+
+当检测到非默认端点可用时，会显示实际工作的端点信息，帮助用户了解服务的实际API格式。
+
 #### 企微通知配置
 
 ##### 设置企微通知
@@ -345,6 +390,7 @@ Options:
 Commands:
   list, ls           列出所有可用的API配置并提示选择
   use <index>        设置当前使用的API配置
+  health             检查各API端点的可用性与网络延迟
   notify, ntf        配置企微通知设置
     setup            设置企微机器人webhook地址
     status           查看当前通知配置状态
@@ -372,6 +418,7 @@ ccs unknown
   list
   ls  
   use
+  health
   notify
   ntf
   o

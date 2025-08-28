@@ -1,44 +1,17 @@
-实现一个在本地运行的node程序 ccs
-功能如下：
-#指令1： ccs list
-读取本机 ~/.claude 文件夹中的 文件apiConfigs.json 文件
-文件内容如下：
-[
-    {
-    "name": "instcopilot",
-    "WEBURL": "https://instcopilot-api.com/",
-    "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxxxx"
-  },
-   {
-    "name": "anyrouter-linux-do",
-    "WEBURL": "https://anyrouter.top",
-    "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxxxx"
-  }
-]
+#指令： ccs health 健康检查行为
+读取本机 ~/.claude/apiConfigs.json 文件
 
-ccs list返回结果：
- 1. instcopilot 
- 2. anyrouter-linux-do 
- 3. ...
- 4. ...
- 5. ...
- 6. ...
- 7. ...
- 8. ...
- 9. ...
- 10. ...
+  ##测试可用性
+  端点: 测试 /v1/models 端点 (适用于 Claude API)。
+  成功标准: 同时接受 2xx (成功) 和 4xx (客户端错误) 状态码。
+    2xx 响应表明端点工作正常。
+    4xx 响应 (如 401, 403 等) 表明端点可达，但可能需要正确的身份验证。
+  失败标准 5xx 服务器错误表明端点存在问题。
+  弹性机制: 需要连续 2 次失败才会将端点标记为不健康。
+  ## 测试网络延迟
 
-#指令2： ccs set <序号>
-读取序号对应的ANTHROPIC_BASE_URL 和ANTHROPIC_AUTH_TOKEN 
-替换 ~/.claude/settings.json ，env属性的对应子属性，
-保存文件
+依次输出 输出name，ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN 的可用性和网络延迟
 
-保存成功后，输出当前配置项如：
-  {
-    "name": "anyrouter-linux-do",
-    "WEBURL": "https://anyrouter.top",
-    "ANTHROPIC_BASE_URL": "http://sh.instcopilot-api.com",
-    "ANTHROPIC_AUTH_TOKEN": "sk-xxxxxxxx"
-  }
+#代码开发要求：放在单独的health.js 文件中，index.js文件中只需要引入health.js 文件并调用
+
+

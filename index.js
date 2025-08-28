@@ -14,6 +14,7 @@ const readline = require('readline');
 const inquirer = require('inquirer');
 const { spawn } = require('child_process');
 const notify = require('./notify');
+const health = require('./health');
 
 // 版本号
 const VERSION = '1.5.0';
@@ -538,13 +539,7 @@ program
     listAndSelectConfig();
   });
 
-program
-  .command('use <index>')
-  .description('设置当前使用的API配置')
-  .action((index) => {
-    ensureConfigDir();
-    setConfig(parseInt(index, 10));
-  });
+// 根据需求移除 set/use 命令
 
 const openCommand = program
   .command('o')
@@ -566,6 +561,9 @@ openCommand
 
 // 注册notify相关命令
 notify.registerNotifyCommands(program);
+
+// 注册health相关命令
+health.registerHealthCommands(program);
 
 // 添加错误处理
 program.on('command:*', (operands) => {
