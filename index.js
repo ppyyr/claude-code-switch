@@ -164,7 +164,7 @@ function getCurrentConfig() {
   
   // 查找匹配的配置，只比较核心字段
   const apiConfigs = readApiConfigs();
-  return apiConfigs.find(config => {
+  const foundConfig = apiConfigs.find(config => {
     if (!config.config) return false;
     
     // 主要比较 env 字段中的关键配置
@@ -173,7 +173,9 @@ function getCurrentConfig() {
     
     return currentEnv.ANTHROPIC_BASE_URL === configEnv.ANTHROPIC_BASE_URL &&
            currentEnv.ANTHROPIC_AUTH_TOKEN === configEnv.ANTHROPIC_AUTH_TOKEN;
-  }) || null;
+  });
+  
+  return foundConfig || null;
 }
 
 /**
@@ -189,10 +191,11 @@ function listAndSelectConfig() {
   
   // 获取当前激活的配置
   const currentConfig = getCurrentConfig();
+  const currentConfigName = currentConfig ? currentConfig.name : null;
   
   // 如果有当前激活的配置，显示它
   if (currentConfig) {
-    console.log(chalk.green('当前激活的配置: ') + chalk.white(currentConfig.name));
+    console.log(chalk.green('当前激活的配置: ') + chalk.white(currentConfigName || 'unknown'));
     console.log();
   }
   
@@ -203,24 +206,29 @@ function listAndSelectConfig() {
   // 准备选项列表
   const choices = apiConfigs.map((config, index) => {
     // 如果是当前激活的配置，添加标记
-    const isActive = currentConfig && config.name === currentConfig.name;
+    const isActive = currentConfigName && config.name === currentConfigName;
     
     // 格式化配置信息：[name] key url，name对齐，密钥不格式化
     const paddedName = config.name.padEnd(maxNameLength, ' ');
-    const configInfo = `[${paddedName}]  ${config.config.env.ANTHROPIC_AUTH_TOKEN}  ${config.config.env.ANTHROPIC_BASE_URL}`;
+    const authToken = config.config.env.ANTHROPIC_AUTH_TOKEN || config.config.env.ANTHROPIC_API_KEY || 'undefined';
+    const baseUrl = config.config.env.ANTHROPIC_BASE_URL || 'undefined';
+    const configInfo = `[${paddedName}]  ${authToken}  ${baseUrl}`;
     
     return `${configInfo}${isActive ? chalk.green(' (当前)') : ''}`;
   });
 
   
-  // 使用inquirer创建交互式菜单，支持多位数输入
+  // 使用inquirer创建交互式菜单，支持数字输入和上下键选择
   inquirer
     .prompt([
       {
         type: 'rawlist',
         name: 'configIndex',
         message: '请选择要切换的配置:',
-        choices: choices, 
+        choices: apiConfigs.map((config, index) => ({
+          name: choices[index],
+          value: index
+        })), 
         pageSize: Math.min(15, apiConfigs.length), // 限制显示行数，避免屏幕溢出
         // 设置更宽的显示宽度以支持长配置信息
         prefix: '',
@@ -228,12 +236,18 @@ function listAndSelectConfig() {
       }
     ])
     .then(answers => {
-      // 用户通过rawlist菜单选择了配置（rawlist返回的是从0开始的索引）
+      // 用户通过list菜单选择了配置（返回的是从0开始的索引）
       const selectedIndex = answers.configIndex;
       const selectedConfig = apiConfigs[selectedIndex];
       
+      // 安全检查
+      if (!selectedConfig) {
+        console.error(chalk.red(`错误: 选择的配置索引 ${selectedIndex} 无效`));
+        return;
+      }
+      
       // 如果选择的配置就是当前激活的配置，提示用户
-      if (currentConfig && selectedConfig.name === currentConfig.name) {
+      if (currentConfigName && selectedConfig.name === currentConfigName) {
         console.log(chalk.yellow(`\n配置 "${selectedConfig.name}" 已经是当前激活的配置`));
         return;
       }
@@ -250,6 +264,12 @@ function listAndSelectConfig() {
  * @param {Object} selectedConfig 选择的配置对象
  */
 function processSelectedConfig(selectedConfig) {
+  // 安全检查
+  if (!selectedConfig || !selectedConfig.name || !selectedConfig.config) {
+    console.error(chalk.red('错误: 选择的配置无效'));
+    return;
+  }
+  
   console.log(chalk.cyan('\n当前选择的配置:'));
   console.log(JSON.stringify(selectedConfig, null, 2));
   
@@ -273,8 +293,8 @@ function processSelectedConfig(selectedConfig) {
         console.log(chalk.cyan('\n当前激活配置详情:'));
         const { name, config } = selectedConfig;
         console.log(chalk.white(`名称: ${name}`));
-        console.log(chalk.white(`API Key: ${config.env.ANTHROPIC_AUTH_TOKEN}`));
-        console.log(chalk.white(`Base URL: ${config.env.ANTHROPIC_BASE_URL}`));
+        console.log(chalk.white(`API Key: ${config.env.ANTHROPIC_AUTH_TOKEN || config.env.ANTHROPIC_API_KEY || 'undefined'}`));
+        console.log(chalk.white(`Base URL: ${config.env.ANTHROPIC_BASE_URL || 'undefined'}`));
         console.log(chalk.white(`Model: ${config.model || 'default'}`));
         
         // 询问是否要在当前目录运行 Claude
